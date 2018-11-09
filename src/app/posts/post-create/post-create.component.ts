@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
-import { Post } from '../post.model';
 import { PostsService } from '../posts.service';
 
 @Component({
@@ -18,6 +17,7 @@ export class PostCreateComponent {
   onAddPost(form: NgForm) {
     if (!form.invalid) {
         this.postService.addPost(form.value.title, form.value.content);
+        form.resetForm();
     }
   }
 }
