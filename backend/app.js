@@ -1,7 +1,17 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
+
+const Post = require('./models/post');
 const app = express();
+
+// cloud atlas 'mongodb+srv://AKZRON:*Gayao1988@cluster0-jpyvm.mongodb.net/MEAN?retryWrites=true'
+// local mongoDB 'mongodb://localhost:27017'
+
+mongoose.connect('mongodb://localhost:27017/MEAN')
+  .then(() => console.log('Connected to database'))
+  .catch((err) => console.log('Connection to database failed with ERROR = ' + err));
 
 // Parses the req body into a JSON object and adds it to req
 app.use(bodyParser.json());
@@ -24,8 +34,12 @@ app.use((req, res, next) => {
 
 app.post('/api/posts', (req, res, next) => {
   // .body is added by app.use(bodyParser.json()); above
-  const post = req.body
-  console.log(post);
+  const post = new Post({
+    title: req.body.title,
+    content: req.body.content
+  });
+  post.save();
+
   // 201 stands for "Success, a new resource was created"
   res.status(201).json({
     message: 'Post added successfully'
@@ -33,24 +47,14 @@ app.post('/api/posts', (req, res, next) => {
 });
 
 app.get('/api/posts', (req, res, next) => {
-  const posts = [
-    {
-      id: 'sdfj234j654j',
-      title: 'First server-side post',
-      content: 'This is comming from the server'
-    },
-    {
-      id: '9054jk4ju59u90o',
-      title: 'Second server-side post',
-      content: 'This is comming from the server!'
-    }
-  ];
-  // This attaches the status and json data to the "res" object which is sent to the response
-  // status 200 is standard for 'success'
-  res.status(200).json({
-    message: 'Posts fetched succesfully!',
-    posts: posts
-  });
+  Post.find()
+    .then(documents => {
+      // status 200 is standard for 'success'
+      res.status(200).json({
+        message: 'Posts fetched succesfully!',
+        posts: documents
+      });
+    });
 });
 
 
