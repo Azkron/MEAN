@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 import { Post } from './post.model';
 
@@ -11,7 +12,7 @@ export class PostsService {
   private posts: Post[] = [];
   private postsUpdated = new Subject<Post[]>();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   getPostsUpdateListener() {
     return this.postsUpdated.asObservable();
@@ -19,6 +20,11 @@ export class PostsService {
 
   notify() {
     this.postsUpdated.next([...this.posts]);
+  }
+
+  refresh() {
+    this.notify();
+    this.router.navigate(['/']);
   }
 
   getPost(id: string) {
@@ -48,7 +54,7 @@ export class PostsService {
       .subscribe((res) => {
         post.id = res.postId;
         this.posts.push(post);
-        this.notify();
+        this.refresh();
       });
   }
 
@@ -58,7 +64,7 @@ export class PostsService {
         console.log(res);
         const postIndex = this.posts.findIndex(p => p.id === post.id);
         this.posts[postIndex] = post;
-        this.notify();
+        this.refresh();
       });
   }
 
@@ -66,7 +72,7 @@ export class PostsService {
     this.http.delete('http://localhost:3000/api/posts/' + id)
       .subscribe(() => {
         this.posts = this.posts.filter(post => post.id !== id);
-        this.notify();
+        this.refresh();
       });
   }
 }
